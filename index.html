@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thai Alphabet Trainer — BTS/MRT</title>
+  <style>
+    :root {
+      --bg: #0b0f12;
+      --card: #141a1f;
+      --muted: #8aa1b1;
+      --text: #e6eef4;
+      --accent: #5cc8ff;
+      --good: #3ecf8e;
+      --bad: #ff6b6b;
+      --warn: #ffb020;
+      --shadow: 0 6px 24px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 10% -10%, #0d2130 0%, var(--bg) 55%);
+      color: var(--text);
+    }
+    header { padding: 24px 20px 8px; }
+    h1 { margin: 0 0 4px; font-weight: 700; letter-spacing: .3px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    main { max-width: 900px; margin: 0 auto; padding: 16px 20px 60px; }
+    .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .toolbar { padding: 10px; display: flex; flex-wrap: wrap; gap: 10px; }
+    button, select {
+      background: #1d2630; color: var(--text); border: 1px solid #26323d; border-radius: 12px; padding: 10px 14px; cursor: pointer; font-weight: 600;
+    }
+    button:hover { border-color: #33424f; }
+    button.primary { background: #16222c; border-color: #2a4152; box-shadow: inset 0 -2px 0 rgba(255,255,255,.02);
+    }
+    button.accent { background: #102533; border-color: #1a4a61; color: #d5f2ff; }
+    button.good { background: #0f2a22; border-color: #1d6a52; color: #d9ffef; }
+    button.warn { background: #2c1b0f; border-color: #7a4b22; color: #ffe9cc; }
+
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; background: #13222c; border: 1px solid #22313d; color: #d7ebf8; font-size: 13px; }
+    .pill .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--accent); }
+
+    .panel { padding: 14px; }
+    .hidden { display: none; }
+
+    table { width: 100%; border-collapse: collapse; overflow: hidden; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #25303a; }
+    thead th { color: #a9c2d6; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .muted { color: var(--muted); }
+
+    .sections { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 840px) {
+      .sections { grid-template-columns: 1.25fr .75fr; }
+    }
+
+    .score { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .score .tile { background: #11171c; border: 1px solid #21303a; border-radius: 12px; padding: 12px; text-align: center; }
+    .score .label { font-size: 12px; color: var(--muted); }
+    .score .value { font-size: 20px; font-weight: 800; }
+
+    .banner { background: linear-gradient(90deg, rgba(92,200,255,.15), rgba(62,207,142,.15)); border: 1px solid #2d505f; padding: 10px 12px; border-radius: 12px; color: #d7f7ff; }
+    .banner.bad { background: linear-gradient(90deg, rgba(255,107,107,.12), rgba(255,176,32,.12)); border-color: #5a2a2a; color: #ffe3e3; }
+
+    .list { display: grid; gap: 6px; }
+    .entry { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: center; background: #10161b; border: 1px solid #22313d; border-radius: 12px; padding: 10px 12px; }
+    .entry .idx { width: 28px; height: 28px; display: inline-grid; place-items: center; border-radius: 10px; border: 1px solid #2a3a46; background: #0f1b23; color: #bde5ff; font-weight: 700; }
+    .entry .title { font-weight: 700; }
+    .entry .sub { color: var(--muted); font-size: 13px; }
+
+    /* Station cards (stacked) */
+    .stationCard { background: #10161b; border: 1px solid #22313d; border-radius: 12px; padding: 12px; display: grid; gap: 4px; text-align:center; }
+    .stationCard .th { font-size: 22px; font-weight: 800; }
+    .stationCard .roman { color: var(--muted); text-align:center; }
+    .stationCard .en { color: var(--text); }
+
+    .pair { display: grid; grid-template-columns: 40px 1fr 64px; gap: 10px; align-items: center; background: #10161b; border: 1px solid #22313d; border-radius: 12px; padding: 8px 10px; }
+    .pair select { width: 100%; }
+
+    .result { display: grid; gap: 6px; }
+    .ok { color: var(--good); }
+    .ng { color: var(--bad); }
+
+    .quizActions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+
+    .footer { margin-top: 10px; color: var(--muted); font-size: 12px; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono"; background: #0f1b23; border: 1px solid #2a3a46; border-radius: 6px; padding: 2px 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Thai Alphabet Trainer — BTS/MRT</h1>
+    <div class="sub">Practice Thai letters with your favorite BTS &amp; MRT stations. Hit <span class="kbd">Warm‑up</span> to browse three station cards, then switch to <span class="kbd">Quiz</span> and see if you can match Thai to English. Lightweight, offline, and a little bit fun.</div>
+  </header>
+  <main>
+    <div class="row">
+      <div class="card" style="flex:1">
+        <div class="toolbar">
+          <button id="btnWarm" class="primary">Warm‑up</button>
+          <button id="btnQuiz" class="accent">Start Quiz</button>
+          <span class="pill" title="Current mode"><span class="dot"></span><span id="modeLabel">Warm‑up</span></span>
+          <span style="flex:1"></span>
+          <button id="btnRefresh" class="">Refresh</button>
+        </div>
+        <div class="panel">
+          <div id="warmPanel">
+            <div id="warmCards" class="list"></div>
+          </div>
+
+          <div id="quizPanel" class="hidden">
+            <div class="sections">
+              <div class="card" style="padding:12px">
+                <h3 style="margin:6px 4px 10px">Thai (match to A–C)</h3>
+                <div id="thaiList" class="list"></div>
+                <div id="quizHelp" class="footer">Choose letters A–C to match.</div>
+              </div>
+              <div class="card" style="padding:12px">
+                <h3 style="margin:6px 4px 10px">English (A–C)</h3>
+                <div id="engList" class="list"></div>
+                <div class="footer">You can press <span class="kbd">Submit</span> when ready.</div>
+              </div>
+            </div>
+
+            <div id="resultBox" class="result" style="margin-top:12px"></div>
+            <div class="quizActions">
+              <button id="btnSubmit" class="good hidden">Submit</button>
+              <button id="btnNext" class="primary hidden">Next round</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="footer" style="margin-top:14px">
+      Tip: You can save this as a single HTML file to run offline anywhere.
+    </div>
+      <div class="card" style="padding:12px; margin-top:16px">
+      <div class="score">
+        <div class="tile"><div class="label">Score</div><div id="scScore" class="value">0</div></div>
+        <div class="tile"><div class="label">Rounds</div><div id="scRounds" class="value">0</div></div>
+        <div class="tile"><div class="label">Streak</div><div id="scStreak" class="value">0</div></div>
+      </div>
+      <div id="streakBanner" class="banner hidden" style="margin-top:10px"></div>
+      <div id="breakBanner" class="banner bad hidden" style="margin-top:10px"></div>
+    </div>
+
+  </main>
+
+  <script>
+    const STATIONS = [
+      // BTS Sukhumvit Line (core)
+      {thai:"หมอชิต", transcript:"Mo Chit", english:"Mo Chit"},
+      {thai:"สะพานควาย", transcript:"Saphan Khwai", english:"Saphan Khwai"},
+      {thai:"อารีย์", transcript:"Ari", english:"Ari"},
+      {thai:"สนามเป้า", transcript:"Sanam Pao", english:"Sanam Pao"},
+      {thai:"อนุสาวรีย์ชัยสมรภูมิ", transcript:"Anusawari Chai", english:"Victory Monument"},
+      {thai:"พญาไท", transcript:"Phaya Thai", english:"Phaya Thai"},
+      {thai:"ราชเทวี", transcript:"Ratchathewi", english:"Ratchathewi"},
+      {thai:"สยาม", transcript:"Siam", english:"Siam"},
+      {thai:"ชิดลม", transcript:"Chit Lom", english:"Chit Lom"},
+      {thai:"เพลินจิต", transcript:"Phloen Chit", english:"Phloen Chit"},
+      {thai:"นานา", transcript:"Nana", english:"Nana"},
+      {thai:"อโศก", transcript:"Asok", english:"Asok"},
+      {thai:"พร้อมพงษ์", transcript:"Phrom Phong", english:"Phrom Phong"},
+      {thai:"ทองหล่อ", transcript:"Thong Lo", english:"Thong Lo"},
+      {thai:"เอกมัย", transcript:"Ekkamai", english:"Ekkamai"},
+      {thai:"พระโขนง", transcript:"Phra Khanong", english:"Phra Khanong"},
+      {thai:"อ่อนนุช", transcript:"On Nut", english:"On Nut"},
+      {thai:"บางจาก", transcript:"Bang Chak", english:"Bang Chak"},
+      {thai:"ปุณณวิถี", transcript:"Punnawithi", english:"Punnawithi"},
+      {thai:"อุดมสุข", transcript:"Udom Suk", english:"Udom Suk"},
+      {thai:"บางนา", transcript:"Bang Na", english:"Bang Na"},
+      {thai:"แบริ่ง", transcript:"Bearing", english:"Bearing"},
+      {thai:"สำโรง", transcript:"Samrong", english:"Samrong"},
+
+      // BTS Silom Line
+      {thai:"สนามกีฬาแห่งชาติ", transcript:"Sanam Khila Haeng Chat", english:"National Stadium"},
+      {thai:"ราชดำริ", transcript:"Ratchadamri", english:"Ratchadamri"},
+      {thai:"ศาลาแดง", transcript:"Sala Daeng", english:"Sala Daeng"},
+      {thai:"ช่องนนทรี", transcript:"Chong Nonsi", english:"Chong Nonsi"},
+      {thai:"สุรศักดิ์", transcript:"Surasak", english:"Surasak"},
+      {thai:"สะพานตากสิน", transcript:"Saphan Taksin", english:"Saphan Taksin"},
+      {thai:"กรุงธนบุรี", transcript:"Krung Thon Buri", english:"Krung Thon Buri"},
+      {thai:"วงเวียนใหญ่", transcript:"Wongwian Yai", english:"Wongwian Yai"},
+      {thai:"ตลาดพลู", transcript:"Talat Phlu", english:"Talat Phlu"},
+      {thai:"วุฒากาศ", transcript:"Wutthakat", english:"Wutthakat"},
+      {thai:"บางหว้า", transcript:"Bang Wa", english:"Bang Wa"},
+
+      // MRT Blue Line (selected)
+      {thai:"เตาปูน", transcript:"Tao Poon", english:"Tao Poon"},
+      {thai:"บางซื่อ", transcript:"Bang Sue", english:"Bang Sue"},
+      {thai:"กำแพงเพชร", transcript:"Kamphaeng Phet", english:"Kamphaeng Phet"},
+      {thai:"สวนจตุจักร", transcript:"Suan Chatuchak", english:"Chatuchak Park"},
+      {thai:"พหลโยธิน", transcript:"Phahon Yothin", english:"Phahon Yothin"},
+      {thai:"ลาดพร้าว", transcript:"Lat Phrao", english:"Lat Phrao"},
+      {thai:"รัชดาภิเษก", transcript:"Ratchadaphisek", english:"Ratchadaphisek"},
+      {thai:"สุทธิสาร", transcript:"Sutthisan", english:"Sutthisan"},
+      {thai:"ห้วยขวาง", transcript:"Huai Khwang", english:"Huai Khwang"},
+      {thai:"ศูนย์วัฒนธรรมแห่งประเทศไทย", transcript:"Sun Watthanatham Haeng Prathet Thai", english:"Thailand Cultural Centre"},
+      {thai:"พระราม 9", transcript:"Phra Ram 9", english:"Phra Ram 9"},
+      {thai:"เพชรบุรี", transcript:"Phetchaburi", english:"Phetchaburi"},
+      {thai:"สุขุมวิท", transcript:"Sukhumvit", english:"Sukhumvit"},
+      {thai:"ศูนย์การประชุมแห่งชาติสิริกิติ์", transcript:"Sun Kan Prachum Haeng Chat Sirikit", english:"Queen Sirikit National Convention Centre"},
+      {thai:"คลองเตย", transcript:"Khlong Toei", english:"Khlong Toei"},
+      {thai:"ลุมพินี", transcript:"Lumphini", english:"Lumphini"},
+      {thai:"สีลม", transcript:"Si Lom", english:"Si Lom"},
+      {thai:"สามย่าน", transcript:"Sam Yan", english:"Sam Yan"},
+      {thai:"หัวลำโพง", transcript:"Hua Lamphong", english:"Hua Lamphong"},
+
+      // MRT Purple Line (a few)
+      {thai:"บางซ่อน", transcript:"Bang Son", english:"Bang Son"},
+      {thai:"วงศ์สว่าง", transcript:"Wong Sawang", english:"Wong Sawang"},
+      {thai:"ศูนย์ราชการนนทบุรี", transcript:"Sun Ratchakan Nonthaburi", english:"Nonthaburi Civic Center"},
+    ];
+
+    const LETTERS = ["A","B","C"]; // indexes 0..2
+
+    // --- Per-glyph romanization (simple, glyph-by-glyph) --------------------
+    // NOTE: This is for alphabet practice. Thai vowel signs may appear before/after
+    // the consonant they are pronounced with; here we map EACH GLYPH as seen.
+    const ROMAN_GLYPH = {
+      // Consonants
+      'ก':'g','ข':'kh','ฃ':'kh','ค':'kh','ฅ':'kh','ฆ':'kh','ง':'ng','จ':'ch','ฉ':'ch','ช':'ch','ซ':'s','ฌ':'ch','ญ':'y','ฎ':'d','ฏ':'t','ฐ':'th','ฑ':'th','ฒ':'th','ณ':'n','ด':'d','ต':'t','ถ':'th','ท':'th','ธ':'th','น':'n','บ':'b','ป':'p','ผ':'ph','ฝ':'f','พ':'ph','ฟ':'f','ภ':'ph','ม':'m','ย':'y','ร':'r','ล':'l','ว':'w','ศ':'s','ษ':'s','ส':'s','ห':'h','ฬ':'l','อ':'o','ฮ':'h',
+      // Vowels & signs
+      'ะ':'a','า':'aa','ิ':'i','ี':'ii','ึ':'ue','ื':'uee','ุ':'u','ู':'uu','เ':'e','แ':'ae','โ':'o','ใ':'ai','ไ':'ai','ำ':'am','๋':'˙','๊':'ˇ','้':'ˊ','่':'ˋ','์':'∅','็':'˘','ั':'a','ๅ':'aa','ฺ':'·','ํ':'m',
+      // Digits (common in names)
+      '0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'
+    };
+    const SKIP_SIGNS = new Set(['่','้','๊','๋','์','ฺ','็','ํ']);
+    const PREPOSED = new Set(['เ','แ','โ','ใ','ไ']);
+    const SEP = '  ·  ';
+    function romanizeGlyphs(str) {
+      const out = [];
+      for (const ch of str) {
+        if (ch === ' ' || ch === '​' || SKIP_SIGNS.has(ch)) continue; // skip spaces/ZWSP & tone/diacritic signs
+        const r = ROMAN_GLYPH[ch];
+        if (r !== undefined) out.push(r);
+        else if (/^[0-9]$/.test(ch)) out.push(ch);
+        else out.push('?');
+      }
+      return out.join(SEP);
+    }
+
+    const els = {
+      modeLabel: document.getElementById('modeLabel'),
+      btnWarm: document.getElementById('btnWarm'),
+      btnQuiz: document.getElementById('btnQuiz'),
+      btnRefresh: document.getElementById('btnRefresh'),
+      btnSubmit: document.getElementById('btnSubmit'),
+      btnNext: document.getElementById('btnNext'),
+      warmPanel: document.getElementById('warmPanel'),
+      quizPanel: document.getElementById('quizPanel'),
+      warmCards: document.getElementById('warmCards'),
+      thaiList: document.getElementById('thaiList'),
+      engList: document.getElementById('engList'),
+      resultBox: document.getElementById('resultBox'),
+      scScore: document.getElementById('scScore'),
+      scRounds: document.getElementById('scRounds'),
+      scStreak: document.getElementById('scStreak'),
+      streakBanner: document.getElementById('streakBanner'),
+      breakBanner: document.getElementById('breakBanner'),
+      quizHelp: document.getElementById('quizHelp'),
+    };
+
+    const state = {
+      mode: 'warm',
+      score: 0,
+      rounds: 0,
+      streak: 0,
+      lastAnnouncedStreak: 0,
+      warmSet: [],
+      quizThai: [],
+      quizEnglish: [], // shuffled strings
+      answerLetters: {}, // {1:'B', 2:'A', 3:'C'}
+    };
+
+    function sampleThree() {
+      const pool = STATIONS.slice();
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      return pool.slice(0,3);
+    }
+
+    // --- Warm-up -------------------------------------------------------------
+    function warmupRefresh() {
+      state.warmSet = sampleThree();
+      els.warmCards.innerHTML = state.warmSet
+        .map(s => `
+          <div class=\"stationCard\">
+            <div class=\"th\">${s.thai}</div>
+            <div class=\"roman mono\">${romanizeGlyphs(s.thai)}</div>
+            <div class=\"en\">${s.english}</div>
+          </div>`)
+        .join('');
+    
+    }
+
+    // --- Quiz ----------------------------------------------------------------
+    function startQuiz() {
+      state.mode = 'quiz';
+      els.modeLabel.textContent = 'Quiz';
+      els.warmPanel.classList.add('hidden');
+      els.quizPanel.classList.remove('hidden');
+      els.btnSubmit.classList.remove('hidden');
+      els.btnNext.classList.add('hidden');
+      els.btnRefresh.classList.add('hidden');
+      newRound();
+    }
+
+    function backToWarmup() {
+      state.mode = 'warm';
+      els.modeLabel.textContent = 'Warm‑up';
+      els.warmPanel.classList.remove('hidden');
+      els.quizPanel.classList.add('hidden');
+      els.btnSubmit.classList.add('hidden');
+      els.btnNext.classList.add('hidden');
+      els.btnRefresh.classList.remove('hidden');
+    }
+
+    function newRound() {
+      state.quizThai = sampleThree();
+      state.quizEnglish = state.quizThai.map(s => s.english);
+      // shuffle english
+      for (let i = state.quizEnglish.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [state.quizEnglish[i], state.quizEnglish[j]] = [state.quizEnglish[j], state.quizEnglish[i]];
+      }
+      state.answerLetters = {};
+      renderQuizBoard();
+      els.resultBox.innerHTML = '';
+      els.btnSubmit.disabled = false;
+      els.btnNext.classList.add('hidden');
+    }
+
+    function renderQuizBoard() {
+      // Thai side with selects (NO transcript shown in quiz mode)
+      els.thaiList.innerHTML = state.quizThai.map((s, i) => {
+        const no = i + 1;
+        return `<div class="pair">
+          <div class="idx">${no}</div>
+          <div><div class="title" style="font-size:20px">${s.thai}</div></div>
+          <div><select id="sel${no}" aria-label="Match for ${s.thai}">
+            <option value="">—</option>
+            ${LETTERS.map(L => `<option value="${L}">${L}</option>`).join('')}
+          </select></div>
+        </div>`;
+      }).join('');
+      // English side
+      els.engList.innerHTML = state.quizEnglish.map((e, i) => {
+        return `<div class="entry"><div class="idx">${LETTERS[i]}</div><div><div class="title">${e}</div></div></div>`;
+      }).join('');
+      els.quizHelp.textContent = 'Choose letters A–C to match.';
+    }
+
+    function submitMapping() {
+      const mapping = {};
+      let filled = 0;
+      for (let i=1; i<=3; i++) {
+        const v = document.getElementById('sel'+i).value.toUpperCase();
+        if (v) { mapping[i] = v; filled++; }
+      }
+      if (filled < 3) {
+        els.quizHelp.textContent = 'Please choose a letter for each Thai station (1–3).';
+        return;
+      }
+      // compute correct letters for each index
+      const correctLetters = {};
+      state.quizThai.forEach((s, idx) => {
+        const correctIndex = state.quizEnglish.indexOf(s.english);
+        correctLetters[idx+1] = LETTERS[correctIndex];
+      });
+
+      let delta = 0;
+      const lines = [];
+      for (let k of ['1','2','3']) {
+        const got = mapping[k];
+        const want = correctLetters[k];
+        if (got === want) {
+          delta += 1;
+          lines.push(`<div class="ok">✅ Correct: ${k}${got}</div>`);
+        } else {
+          lines.push(`<div class="ng">❌ Wrong: ${k}${got} → ${k}${want}</div>`);
+        }
+      }
+
+      state.score += delta;
+      state.rounds += 1;
+      updateScoreboard();
+
+      const perfect = (delta === 3);
+      let banners = '';
+      if (perfect) {
+        state.streak += 1;
+        if (state.streak >= 2 && state.streak > state.lastAnnouncedStreak) {
+          // Highlight streak only when it grows beyond 1
+          showStreakBanner(`🔥 Streak! ${state.streak} perfect rounds in a row.`);
+          state.lastAnnouncedStreak = state.streak;
+        }
+      } else {
+        if (state.streak > 0) {
+          showBreakBanner(`Streak broken at ${state.streak}.`);
+        }
+        state.streak = 0;
+      }
+      updateScoreboard();
+
+      els.resultBox.innerHTML = `<div>${lines.join('')}</div>`;
+      els.btnSubmit.disabled = true;
+      els.btnNext.classList.remove('hidden');
+    }
+
+    function updateScoreboard() {
+      els.scScore.textContent = state.score;
+      els.scRounds.textContent = state.rounds;
+      els.scStreak.textContent = state.streak;
+    }
+
+    function showStreakBanner(msg) {
+      els.breakBanner.classList.add('hidden');
+      els.streakBanner.textContent = msg;
+      els.streakBanner.classList.remove('hidden');
+      // Auto-hide after a few seconds to reduce noise
+      setTimeout(() => els.streakBanner.classList.add('hidden'), 4500);
+    }
+    function showBreakBanner(msg) {
+      els.streakBanner.classList.add('hidden');
+      els.breakBanner.textContent = msg;
+      els.breakBanner.classList.remove('hidden');
+      setTimeout(() => els.breakBanner.classList.add('hidden'), 3500);
+    }
+
+    // --- Wire UI -------------------------------------------------------------
+    els.btnWarm.addEventListener('click', backToWarmup);
+    els.btnQuiz.addEventListener('click', startQuiz);
+    els.btnRefresh.addEventListener('click', warmupRefresh);
+    els.btnSubmit.addEventListener('click', submitMapping);
+    els.btnNext.addEventListener('click', newRound);
+
+    // Boot
+    warmupRefresh();
+  </script>
+</body>
+</html>
