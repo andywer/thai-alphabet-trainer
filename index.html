@@ -24,9 +24,9 @@
       background: radial-gradient(1200px 800px at 10% -10%, #0d2130 0%, var(--bg) 55%);
       color: var(--text);
     }
-    header { padding: 24px 20px 8px; }
-    h1 { margin: 0 0 4px; font-weight: 700; letter-spacing: .3px; }
-    .sub { color: var(--muted); font-size: 14px; }
+    header { padding: 32px 20px 12px; }
+    h1 { margin: 0 0 8px; font-weight: 700; letter-spacing: .3px; text-wrap: balance; }
+    .sub { color: var(--muted); font-size: 14px; margin: 6px 0 18px; max-width: 68ch; line-height: 1.6; }
     main { max-width: 900px; margin: 0 auto; padding: 16px 20px 60px; }
     .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
     .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -53,6 +53,9 @@
     tbody tr:last-child td { border-bottom: 0; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
     .muted { color: var(--muted); }
+
+    /* Constrain header content to main width */
+    header .inner { max-width: 900px; margin: 0 auto; padding: 0 20px; }
 
     .sections { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 840px) {
@@ -94,8 +97,10 @@
 </head>
 <body>
   <header>
-    <h1>Thai Alphabet Trainer — BTS/MRT</h1>
+    <div class="inner">
+      <h1>Thai Alphabet Trainer — BTS/MRT</h1>
     <div class="sub">Practice Thai letters with your favorite BTS &amp; MRT stations. Hit <span class="kbd">Warm‑up</span> to browse three station cards, then switch to <span class="kbd">Quiz</span> and see if you can match Thai to English. Lightweight, offline, and a little bit fun.</div>
+    </div>
   </header>
   <main>
     <div class="row">
